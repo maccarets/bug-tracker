@@ -1,11 +1,13 @@
-
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from bug_tracker.views import (RegisterView, TestRunListView, TestCaseDetailView,
-    TestCaseListView, TestCaseCreateView, TestCaseUpdateView, TestCaseDeleteView, ProjectListView, ProjectCreateView,
-    ProjectDetailView, ProjectUpdateView, ProjectDeleteView, AddTestCaseView, TestRunCreateView, TestRunUpdateView,
-    TestRunDeleteView, TestRunDetailView, TestResultUpdateView, TestResultDetailView, ConnectTelegramView,
-    share_project, TestResultListView, IndexView)
+                               TestCaseListView, TestCaseCreateView, TestCaseUpdateView, TestCaseDeleteView,
+                               ProjectListView, ProjectCreateView,
+                               ProjectDetailView, ProjectUpdateView, ProjectDeleteView, AddTestCaseView,
+                               TestRunCreateView, TestRunUpdateView,
+                               TestRunDeleteView, TestRunDetailView, TestResultUpdateView, TestResultDetailView,
+                               ConnectTelegramView,
+                               share_project, TestResultListView, IndexView, SharedProjectListView)
 
 urlpatterns = [
     path('connect-telegram/', ConnectTelegramView.as_view(), name='connect_telegram'),
@@ -16,6 +18,7 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     # Project URLs
     path('project/', ProjectListView.as_view(), name='project_list'),
+    path('shared_project/', SharedProjectListView.as_view(), name='shared_project_list'),
     path('project/create/', ProjectCreateView.as_view(), name='project_create'),
     path('project/<int:pk>/', ProjectDetailView.as_view(), name='project_detail'),
     path('project/<int:pk>/update/', ProjectUpdateView.as_view(), name='project_update'),

@@ -74,6 +74,16 @@ class ProjectListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['created_projects'] = self.request.user.user.all()
+        return context
+
+
+class SharedProjectListView(LoginRequiredMixin, ListView):
+    model = Project
+    template_name = 'bug_tracker/shared_project_list.html'
+    context_object_name = 'projects'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['shared_projects'] = self.request.user.users.all()
         return context
 
