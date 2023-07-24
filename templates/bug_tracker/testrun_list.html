@@ -10,15 +10,15 @@
         <col style="width: 20%">
         <col style="width: 20%">
         <col style="width: 15%">
-        <col style="width: 30%">
-        <col style="width: 15%">
+        <col style="width: 35%">
+        <col style="width: 10%">
         <thead>
         <tr>
           <th>Title</th>
           <th>Deadline</th>
           <th>Project</th>
           <th>Progress</th>
-          <th>Action</th>
+          <th></th>
         </tr>
         </thead>
         <tbody>
@@ -44,8 +44,12 @@
               </div>
             </td>
             <td>
-              <a href="{% url 'testrun_update' testrun.pk %}" class="btn btn-sm btn-warning">Edit</a>
-              <a href="{% url 'testrun_delete' testrun.pk %}" class="btn btn-sm btn-danger">Delete</a>
+              <a href="{% url 'testrun_update' testrun.pk %}" class="">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+              <a class="" href="{% url 'testrun_delete' testrun.pk %}">
+                <i class="bi bi-trash"></i>
+              </a>
             </td>
           </tr>
         {% endfor %}

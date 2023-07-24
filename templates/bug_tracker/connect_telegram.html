@@ -1,18 +1,22 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
+  <div class="card">
+    <div class="card-body">
+      <h1 class="card-title">Connect Telegram</h1>
 
-  <h1>Connect Telegram</h1>
+      {% if token %}
+        <p>Your Telegram token: {{ token }}</p>
+        <p>Your Telegram chat ID: {{ chat_id }}</p>
+      {% else %}
+        <p>No Telegram token found for the current user.</p>
+      {% endif %}
 
-  {% if token %}
-    <p>Your Telegram token: {{ token }}</p>
-    <p>Your Telegram chat ID: {{ chat_id }}</p>
-  {% else %}
-    <p>No Telegram token found for the current user.</p>
-  {% endif %}
+      <form method="POST" action="{% url 'connect_telegram' %}">
+        {% csrf_token %}
+        <input type="submit" value="Connect Telegram" class="btn btn-primary">
+      </form>
 
-  <form method="POST" action="{% url 'connect_telegram' %}">
-    {% csrf_token %}
-    <input type="submit" value="Connect Telegram" class="btn btn-primary">
-  </form>
+    </div>
+  </div>
 {% endblock %}
