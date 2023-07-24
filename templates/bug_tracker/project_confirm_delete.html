@@ -1,0 +1,11 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+  <h1>Delete Project "{{ object.title }}"</h1>
+  <form method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to delete "{{ object.title }}"?</p>
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="{% url 'project_detail' object.pk %}" class="btn btn-primary">Cancel</a>
+  </form>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_filters %}
+
+{% block content %}
+  <h2>{% if testrun.id %}Update Test Run{% else %}Create Test Run{% endif %}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% if form.errors %}
+      <div class="alert alert-danger" role="alert">
+        <ul>
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">{% if testrun.id %}Update{% else %}Create{% endif %}</button>
+  </form>
+{% endblock %}

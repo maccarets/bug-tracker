@@ -1,0 +1,152 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+  {% if message %}
+    <div class="alert alert-warning" role="alert">
+      {{ message }}
+    </div>
+  {% else %}
+
+    <h1 class="d-inline-block">{{ test_run.title }}</h1>
+    <a href="{% url 'add_test_case' pk=test_run.id %}" class="btn btn-primary float-right">Add Test Case</a>
+
+    <div class="row">
+      <div class="col-md-5">
+
+        <p>Deadline: {{ test_run.deadline }}</p>
+        <p>Project: <a href="{% url 'project_detail' test_run.project.pk %}">{{ test_run.project.title }}</a></p>
+        <p>Description: {{ test_run.description }}</p>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Test Results Summary</h5>
+            <div class="chart-container" style="height: 400px;">
+              <canvas id="donutChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Add the Chart.js library -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            // Get the summary data
+            const passedCount = {{ passed_count }};
+            const failedCount = {{ failed_count }};
+            const blockedCount = {{ blocked_count }};
+            const untestedCount = {{ untested_count }};
+
+            // Calculate the total count for data normalization
+            const totalCount = passedCount + failedCount + blockedCount + untestedCount;
+
+            // Create a donut chart
+            const ctx = document.getElementById('donutChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut', // Use 'doughnut' type for a donut chart
+                data: {
+                    labels: ['Passed', 'Failed', 'Blocked', 'Untested'],
+                    datasets: [{
+                        data: [
+                            (passedCount / totalCount) * 100,
+                            (failedCount / totalCount) * 100,
+                            (blockedCount / totalCount) * 100,
+                            (untestedCount / totalCount) * 100
+                        ],
+                        backgroundColor: [
+                            'rgb(40, 167, 69)',
+                            'rgb(220, 53, 69)',
+                            'rgb(255, 193, 7)',
+                            'rgb(108, 117, 125)'
+                        ],
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutoutPercentage: 40, // Adjust this value to control the size of the hole in the middle (0-100)
+                    legend: {
+                        display: true,
+                        position: 'bottom', // You can change the legend position to 'top', 'left', or 'right' as well
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: (tooltipItem, data) => {
+                                // Show the actual count and percentage in the tooltip
+                                const dataset = data.datasets[tooltipItem.datasetIndex];
+                                const total = dataset.data.reduce((previousValue, currentValue) => previousValue + currentValue);
+                                const currentValue = dataset.data[tooltipItem.index];
+                                const percentage = ((currentValue / total) * 100).toFixed(2);
+                                return `${data.labels[tooltipItem.index]}: ${currentValue} (${percentage}%)`;
+                            },
+                        },
+                    },
+                },
+            });
+        </script>
+
+      </div>
+
+      <div class="col-md-7">
+        <div class="sticky-top">
+          <div class="d-flex justify-content-end">
+            <!-- Test Result Filter -->
+            <h5>Filter Test Results:</h5>
+            <form method="GET" class="form-inline">
+              <div class="mb-3 mr-3">
+                <select name="status" id="status" class="form-control" onchange="this.form.submit()">
+                  <option value="">All Statuses</option>
+                  <option value="passed" {% if request.GET.status == 'passed' %}selected{% endif %}>Passed</option>
+                  <option value="failed" {% if request.GET.status == 'failed' %}selected{% endif %}>Failed</option>
+                  <option value="blocked" {% if request.GET.status == 'blocked' %}selected{% endif %}>Blocked</option>
+                  <option value="untested" {% if request.GET.status == 'untested' %}selected{% endif %}>Untested
+                  </option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <select name="priority" id="priority" class="form-control" onchange="this.form.submit()">
+                  <option value="">All Priorities</option>
+                  <option value="high" {% if request.GET.priority == 'high' %}selected{% endif %}>High</option>
+                  <option value="medium" {% if request.GET.priority == 'medium' %}selected{% endif %}>Medium</option>
+                  <option value="low" {% if request.GET.priority == 'low' %}selected{% endif %}>Low</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <hr>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">Test Results</h2>
+
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                <tr>
+                  <th>Test Case</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for test_result in test_results %}
+                  <tr>
+                    <td>{{ test_result.test_case.title }}</td>
+                    <td>{{ test_result.test_case.get_priority_display }}</td>
+                    <td>{{ test_result.get_status_display }}</td>
+                    <td>
+                      <a href="{% url 'testresult_detail' result_id=test_result.id %}"
+                         class="btn btn-outline-primary btn-sm">View</a>
+                      <a href="{% url 'testresult_update' pk=test_result.id %}" class="btn btn-outline-primary btn-sm">Edit</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

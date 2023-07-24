@@ -1,0 +1,73 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+  <h1>Test Results</h1>
+
+  <div class="row">
+    <form method="GET" class="form-row">
+      <div class="form-group">
+        <label for="projectFilter">Filter by Test Run:</label>
+        <select class="form-control" id="projectFilter" name="project" onchange="this.form.submit()">
+          <option value="">All</option>
+          {% for testrun in testruns %}
+            <option value="{{ testrun.id }}"
+                    {% if testrun.id|stringformat:"s" == request.GET.testrun|stringformat:"s" %}selected{% endif %}>{{ testrun.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="statusFilter">Filter by Status:</label>
+        <select class="form-control" id="statusFilter" name="status" onchange="this.form.submit()">
+          <option value="">All Statuses</option>
+          <option value="passed" {% if request.GET.status == 'passed' %}selected{% endif %}>Passed</option>
+          <option value="failed" {% if request.GET.status == 'failed' %}selected{% endif %}>Failed</option>
+          <option value="blocked" {% if request.GET.status == 'blocked' %}selected{% endif %}>Blocked</option>
+          <option value="untested" {% if request.GET.status == 'untested' %}selected{% endif %}>Untested</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="projectFilter">Filter by Project: </label>
+        <select class="form-control" id="projectFilter" name="project" onchange="this.form.submit()">
+          <option value="">All</option>
+          {% for project in projects %}
+            <option value="{{ project.id }}"
+                    {% if project.id|stringformat:"s" == request.GET.project|stringformat:"s" %}selected{% endif %}>{{ project.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Test Results</h5>
+
+      <!-- Table with hoverable rows -->
+      <table class="table table-hover">
+        <thead>
+        <tr>
+          <th>Test Case</th>
+          <th>Test Run</th>
+          <th>Status</th>
+          <th>Project</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for testresult in testresults %}
+          <tr>
+            <td><a href="{% url 'testresult_detail' testresult.pk %}">{{ testresult.test_case.title }}</a></td>
+            <td>{{ testresult.test_run.title }}</td>
+            <td>{{ testresult.status }}</td>
+            <td>{{ testresult.test_run.project.title }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4">No test results available.</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <!-- End Table with hoverable rows -->
+    </div>
+  </div>
+{% endblock %}
