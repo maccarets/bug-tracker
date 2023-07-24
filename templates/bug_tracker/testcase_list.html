@@ -34,10 +34,10 @@
                       <td>{{ testcase.priority }}</td>
                       <td>{{ testcase.project.title }}</td>
                       <td>
-                        <a href="{% url 'testcase_update' project.pk %}" class="">
+                        <a href="{% url 'testcase_update' testcase.pk %}" class="">
                           <i class="bi bi-pencil-square"></i>
                         </a>
-                        <a class="" href="{% url 'testcase_delete' project.pk %}">
+                        <a class="" href="{% url 'testcase_delete' testcase.pk %}">
                           <i class="bi bi-trash"></i>
                         </a>
                       </td>
