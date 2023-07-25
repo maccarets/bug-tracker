@@ -40,7 +40,6 @@ class TestRunForm(forms.ModelForm):
 
     deadline = forms.DateField(
         widget=DateInput(),
-        help_text='Please select a deadline in the format YYYY-MM-DD.'
     )
 
     class Meta:
