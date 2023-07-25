@@ -9,11 +9,11 @@ class RegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ["username", "email", "password1", "password2"]
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
+        user.email = self.cleaned_data["email"]
         if commit:
             user.save()
         return user
@@ -22,21 +22,28 @@ class RegisterForm(UserCreationForm):
 class TestCaseForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super(TestCaseForm, self).__init__(*args, **kwargs)
-        self.fields['project'].queryset = user.user.all() | user.users.all()
+        self.fields["project"].queryset = user.user.all() | user.users.all()
 
     class Meta:
         model = TestCase
-        fields = ['title', 'description', 'steps', 'expected_result', 'priority', 'project']
+        fields = [
+            "title",
+            "description",
+            "steps",
+            "expected_result",
+            "priority",
+            "project",
+        ]
 
 
 class DateInput(forms.DateInput):
-    input_type = 'date'
+    input_type = "date"
 
 
 class TestRunForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super(TestRunForm, self).__init__(*args, **kwargs)
-        self.fields['project'].queryset = user.user.all() | user.users.all()
+        self.fields["project"].queryset = user.user.all() | user.users.all()
 
     deadline = forms.DateField(
         widget=DateInput(),
@@ -44,25 +51,29 @@ class TestRunForm(forms.ModelForm):
 
     class Meta:
         model = TestRun
-        fields = ['title', 'description', 'deadline', 'project']
+        fields = ["title", "description", "deadline", "project"]
 
 
 class TestResultForm(forms.ModelForm):
     class Meta:
         model = TestResult
-        fields = ('status', 'actual_result')
+        fields = ("status", "actual_result")
         labels = {
-            'status': 'Status',
-            'actual_result': 'Actual Result',
+            "status": "Status",
+            "actual_result": "Actual Result",
         }
 
 
 class ShareProjectForm(forms.Form):
-    users = forms.ModelMultipleChoiceField(queryset=None, widget=forms.CheckboxSelectMultiple)
+    users = forms.ModelMultipleChoiceField(
+        queryset=None, widget=forms.CheckboxSelectMultiple
+    )
 
     def __init__(self, *args, **kwargs):
-        project = kwargs.pop('project')
+        project = kwargs.pop("project")
         super().__init__(*args, **kwargs)
 
         # Exclude the user who created the project from the queryset
-        self.fields['users'].queryset = User.objects.exclude(id=project.created_by.id)
+        self.fields["users"].queryset = User.objects.exclude(
+            id=project.created_by.id
+        )

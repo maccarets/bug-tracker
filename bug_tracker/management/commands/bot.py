@@ -7,8 +7,7 @@ bot = TeleBot(settings.TELEGRAM_BOT_API_KEY, threaded=False)
 
 
 class Command(BaseCommand):
-
-    help = 'Implemented to Django application telegram bot setup command'
+    help = "Implemented to Django application telegram bot setup command"
 
     def handle(self, *args, **kwargs):
         @bot.message_handler(func=lambda message: True)
@@ -20,8 +19,9 @@ class Command(BaseCommand):
                 telegram_user = TelegramUser.objects.get(token=token)
                 telegram_user.chat_id = chat_id
                 telegram_user.save()
-                bot.reply_to(message, 'Chat ID has been associated with your token.')
+                bot.reply_to(message,
+                             "Chat ID has been associated with your token.")
             except TelegramUser.DoesNotExist:
-                bot.reply_to(message, 'Invalid token. Please try again.')
+                bot.reply_to(message, "Invalid token. Please try again.")
 
         bot.infinity_polling()

@@ -6,7 +6,13 @@ from django.db.models import Q, Count, F, IntegerField, Value, Case, When
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views import View
-from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
+from django.views.generic import (
+    CreateView,
+    ListView,
+    DetailView,
+    UpdateView,
+    DeleteView,
+)
 from telebot import TeleBot
 from .forms import RegisterForm, TestCaseForm, TestRunForm
 from .forms import ShareProjectForm
@@ -27,11 +33,11 @@ class ConnectTelegramView(View):
             chat_id = None
 
         context = {
-            'token': token,
-            'chat_id': chat_id,
+            "token": token,
+            "chat_id": chat_id,
         }
 
-        return render(request, 'bug_tracker/connect_telegram.html', context)
+        return render(request, "bug_tracker/connect_telegram.html", context)
 
     def post(self, request):
         user = request.user
@@ -47,88 +53,113 @@ class ConnectTelegramView(View):
             token = generate_unique_token()
             telegram_user = TelegramUser.objects.create(user=user, token=token)
 
-        return redirect('connect_telegram')
+        return redirect("connect_telegram")
 
 
 class IndexView(View):
     def get(self, request):
         if request.user.is_authenticated:
             # User is authenticated, redirect to project page
-            return redirect('project_list')
+            return redirect("project_list")
         else:
             # User is not authenticated, redirect to login page
-            return redirect(reverse('login'))
+            return redirect(reverse("login"))
 
 
 class RegisterView(CreateView):
     form_class = RegisterForm
-    success_url = reverse_lazy('login')
-    template_name = 'registration/register.html'
+    success_url = reverse_lazy("login")
+    template_name = "registration/register.html"
 
 
 class ProjectListView(LoginRequiredMixin, ListView):
     model = Project
-    template_name = 'bug_tracker/project_list.html'
-    context_object_name = 'projects'
+    template_name = "bug_tracker/project_list.html"
+    context_object_name = "projects"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['created_projects'] = self.request.user.user.all()
+        context["created_projects"] = self.request.user.user.all()
         return context
 
 
 class SharedProjectListView(LoginRequiredMixin, ListView):
     model = Project
-    template_name = 'bug_tracker/shared_project_list.html'
-    context_object_name = 'projects'
+    template_name = "bug_tracker/shared_project_list.html"
+    context_object_name = "projects"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['shared_projects'] = self.request.user.users.all()
+        context["shared_projects"] = self.request.user.users.all()
         return context
 
 
 class ProjectDetailView(View):
     def get(self, request, pk):
         project = get_object_or_404(Project, pk=pk)
-        testcases = project.testcase_set.all()  # Retrieve all related test cases for the project
-        testruns = project.testrun_set.all()  # Retrieve all related test runs for the project
+        testcases = (
+            project.testcase_set.all()
+        )  # Retrieve all related test cases for the project
+        testruns = (
+            project.testrun_set.all()
+        )  # Retrieve all related test runs for the project
 
         testrun_data = []
         for testrun in testruns:
-            passed_count = testrun.test_results.filter(status='passed').count()
-            failed_count = testrun.test_results.filter(status='failed').count()
-            blocked_count = testrun.test_results.filter(status='blocked').count()
-            untested_count = testrun.test_results.filter(status='untested').count()
+            passed_count = testrun.test_results.filter(
+                status="passed").count()
+            failed_count = testrun.test_results.filter(
+                status="failed").count()
+            blocked_count = testrun.test_results.filter(
+                status="blocked").count()
+            untested_count = testrun.test_results.filter(
+                status="untested").count()
             total_count = testrun.test_results.count()
 
-            passed_percent = (passed_count / total_count) * 100 if total_count > 0 else 0
-            failed_percent = (failed_count / total_count) * 100 if total_count > 0 else 0
-            blocked_percent = (blocked_count / total_count) * 100 if total_count > 0 else 0
-            untested_percent = (untested_count / total_count) * 100 if total_count > 0 else 0
+            passed_percent = (
+                (passed_count / total_count) * 100 if total_count > 0 else 0
+            )
+            failed_percent = (
+                (failed_count / total_count) * 100 if total_count > 0 else 0
+            )
+            blocked_percent = (
+                (blocked_count / total_count) * 100 if total_count > 0 else 0
+            )
+            untested_percent = (
+                (untested_count / total_count) * 100 if total_count > 0 else 0
+            )
 
-            testrun_data.append({
-                'testrun': testrun,
-                'passed_count': passed_count,
-                'failed_count': failed_count,
-                'blocked_count': blocked_count,
-                'untested_count': untested_count,
-                'total_count': total_count,
-                'passed_percent': passed_percent,
-                'failed_percent': failed_percent,
-                'blocked_percent': blocked_percent,
-                'untested_percent': untested_percent
-            })
+            testrun_data.append(
+                {
+                    "testrun": testrun,
+                    "passed_count": passed_count,
+                    "failed_count": failed_count,
+                    "blocked_count": blocked_count,
+                    "untested_count": untested_count,
+                    "total_count": total_count,
+                    "passed_percent": passed_percent,
+                    "failed_percent": failed_percent,
+                    "blocked_percent": blocked_percent,
+                    "untested_percent": untested_percent,
+                }
+            )
 
-        return render(request, 'bug_tracker/project_detail.html',
-                      {'project': project, 'testcases': testcases, 'testrun_data': testrun_data})
+        return render(
+            request,
+            "bug_tracker/project_detail.html",
+            {
+                "project": project,
+                "testcases": testcases,
+                "testrun_data": testrun_data
+            },
+        )
 
 
 class ProjectCreateView(LoginRequiredMixin, CreateView):
     model = Project
-    fields = ['title', 'description']
-    template_name = 'bug_tracker/project_form.html'
-    success_url = reverse_lazy('project_list')
+    fields = ["title", "description"]
+    template_name = "bug_tracker/project_form.html"
+    success_url = reverse_lazy("project_list")
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
@@ -137,9 +168,9 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
 
 class ProjectUpdateView(LoginRequiredMixin, UpdateView):
     model = Project
-    fields = ['title', 'description']
-    template_name = 'bug_tracker/project_form.html'
-    success_url = reverse_lazy('project_list')
+    fields = ["title", "description"]
+    template_name = "bug_tracker/project_form.html"
+    success_url = reverse_lazy("project_list")
 
     def get_queryset(self):
         return super().get_queryset().filter(created_by=self.request.user)
@@ -147,8 +178,8 @@ class ProjectUpdateView(LoginRequiredMixin, UpdateView):
 
 class ProjectDeleteView(LoginRequiredMixin, DeleteView):
     model = Project
-    template_name = 'bug_tracker/project_confirm_delete.html'
-    success_url = reverse_lazy('project_list')
+    template_name = "bug_tracker/project_confirm_delete.html"
+    success_url = reverse_lazy("project_list")
 
     def get_queryset(self):
         return super().get_queryset().filter(created_by=self.request.user)
@@ -158,26 +189,23 @@ class ProjectDeleteView(LoginRequiredMixin, DeleteView):
 def share_project(request, project_id):
     project = get_object_or_404(Project, id=project_id)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ShareProjectForm(request.POST, project=project)
         if form.is_valid():
-            users = form.cleaned_data['users']
+            users = form.cleaned_data["users"]
             project.shared_with.set(users)
-            return redirect('project_detail', pk=project.id)
+            return redirect("project_detail", pk=project.id)
     else:
         form = ShareProjectForm(project=project)
 
-    context = {
-        'project': project,
-        'form': form
-    }
-    return render(request, 'bug_tracker/share_project.html', context)
+    context = {"project": project, "form": form}
+    return render(request, "bug_tracker/share_project.html", context)
 
 
 class TestRunListView(LoginRequiredMixin, ListView):
     model = TestRun
-    template_name = 'bug_tracker/testrun_list.html'
-    context_object_name = 'testruns'
+    template_name = "bug_tracker/testrun_list.html"
+    context_object_name = "testruns"
 
     def get_queryset(self):
         user = self.request.user
@@ -191,29 +219,41 @@ class TestRunListView(LoginRequiredMixin, ListView):
 
         # Annotate the queryset as before
         queryset = queryset.annotate(
-            passed_count=Count('test_results', filter=Q(test_results__status=TestResult.PASSED)),
-            failed_count=Count('test_results', filter=Q(test_results__status=TestResult.FAILED)),
-            blocked_count=Count('test_results', filter=Q(test_results__status=TestResult.BLOCKED)),
-            skipped_count=Count('test_results', filter=Q(test_results__status=TestResult.UNTESTED)),
-            total_count=Count('test_results'),
+            passed_count=Count(
+                "test_results", filter=Q(
+                    test_results__status=TestResult.PASSED)
+            ),
+            failed_count=Count(
+                "test_results", filter=Q(
+                    test_results__status=TestResult.FAILED)
+            ),
+            blocked_count=Count(
+                "test_results", filter=Q(
+                    test_results__status=TestResult.BLOCKED)
+            ),
+            skipped_count=Count(
+                "test_results", filter=Q(
+                    test_results__status=TestResult.UNTESTED)
+            ),
+            total_count=Count("test_results"),
             passed_percent=Case(
                 When(total_count=0, then=Value(0)),
-                default=100 * F('passed_count') / F('total_count'),
+                default=100 * F("passed_count") / F("total_count"),
                 output_field=IntegerField(),
             ),
             failed_percent=Case(
                 When(total_count=0, then=Value(0)),
-                default=100 * F('failed_count') / F('total_count'),
+                default=100 * F("failed_count") / F("total_count"),
                 output_field=IntegerField(),
             ),
             blocked_percent=Case(
                 When(total_count=0, then=Value(0)),
-                default=100 * F('blocked_count') / F('total_count'),
+                default=100 * F("blocked_count") / F("total_count"),
                 output_field=IntegerField(),
             ),
             skipped_percent=Case(
                 When(total_count=0, then=Value(0)),
-                default=100 * F('skipped_count') / F('total_count'),
+                default=100 * F("skipped_count") / F("total_count"),
                 output_field=IntegerField(),
             ),
         )
@@ -229,7 +269,7 @@ class TestRunDetailView(LoginRequiredMixin, View):
         if not test_run:
             # Test run not found, generate template with a message
             context = {
-                'message': 'Test run not found.',
+                "message": "Test run not found.",
             }
             return render(request, self.template_name, context)
         test_results = test_run.test_results.all()
@@ -239,21 +279,21 @@ class TestRunDetailView(LoginRequiredMixin, View):
         blocked_count = test_results.filter(status="blocked").count()
         untested_count = test_results.filter(status="untested").count()
 
-        status = request.GET.get('status')
+        status = request.GET.get("status")
         if status:
             test_results = test_results.filter(status=status)
-        priority = request.GET.get('priority')
+        priority = request.GET.get("priority")
 
         if priority:
             test_results = test_results.filter(test_case__priority=priority)
 
         context = {
-            'test_run': test_run,
-            'test_results': test_results,
-            'passed_count': passed_count,
-            'failed_count': failed_count,
-            'blocked_count': blocked_count,
-            'untested_count': untested_count,
+            "test_run": test_run,
+            "test_results": test_results,
+            "passed_count": passed_count,
+            "failed_count": failed_count,
+            "blocked_count": blocked_count,
+            "untested_count": untested_count,
         }
         return render(request, self.template_name, context)
 
@@ -261,139 +301,152 @@ class TestRunDetailView(LoginRequiredMixin, View):
 class TestRunCreateView(LoginRequiredMixin, CreateView):
     model = TestRun
     form_class = TestRunForm
-    template_name = 'bug_tracker/testrun_form.html'
-    success_url = reverse_lazy('testrun_list')
+    template_name = "bug_tracker/testrun_form.html"
+    success_url = reverse_lazy("testrun_list")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
 
 class TestRunUpdateView(LoginRequiredMixin, UpdateView):
     model = TestRun
     form_class = TestRunForm
-    template_name = 'bug_tracker/testrun_form.html'
-    success_url = reverse_lazy('testrun_list')
+    template_name = "bug_tracker/testrun_form.html"
+    success_url = reverse_lazy("testrun_list")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
 
 class AddTestCaseView(LoginRequiredMixin, View):
-
     def get(self, request, pk):
         test_run = get_object_or_404(TestRun, pk=pk)
-        test_cases = TestCase.objects.filter(project=test_run.project).exclude(test_results__test_run=test_run)
-        return render(request, 'bug_tracker/add_test_case.html', {'test_run': test_run, 'test_cases': test_cases})
+        test_cases = TestCase.objects.filter(project=test_run.project).exclude(
+            test_results__test_run=test_run
+        )
+        return render(
+            request,
+            "bug_tracker/add_test_case.html",
+            {"test_run": test_run, "test_cases": test_cases},
+        )
 
     def post(self, request, pk):
         test_run = get_object_or_404(TestRun, pk=pk)
-        test_case_ids = request.POST.getlist('test_case_ids')
+        test_case_ids = request.POST.getlist("test_case_ids")
         for test_case_id in test_case_ids:
             test_case = get_object_or_404(TestCase, pk=test_case_id)
             TestResult.objects.create(test_run=test_run, test_case=test_case)
-        return redirect('testrun_detail', pk=pk)
+        return redirect("testrun_detail", pk=pk)
 
 
 class TestRunDeleteView(LoginRequiredMixin, DeleteView):
     model = TestRun
-    template_name = 'bug_tracker/testrun_confirm_delete.html'
-    success_url = reverse_lazy('testrun_list')
+    template_name = "bug_tracker/testrun_confirm_delete.html"
+    success_url = reverse_lazy("testrun_list")
 
 
 class TestCaseListView(LoginRequiredMixin, ListView):
-    template_name = 'bug_tracker/testcase_list.html'
-    context_object_name = 'testcases'
+    template_name = "bug_tracker/testcase_list.html"
+    context_object_name = "testcases"
 
     def get_queryset(self):
         user = self.request.user
-        return TestCase.objects.filter(Q(project__created_by=user) | Q(project__shared_with=user)).distinct()
+        return TestCase.objects.filter(
+            Q(project__created_by=user) | Q(project__shared_with=user)
+        ).distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        context['projects_created'] = Project.objects.filter(created_by=user)
-        context['projects_shared'] = Project.objects.filter(shared_with=user).exclude(created_by=user)
+        context["projects_created"] = Project.objects.filter(created_by=user)
+        context["projects_shared"] = Project.objects.filter(
+            shared_with=user
+        ).exclude(created_by=user)
         return context
 
 
 class TestCaseDetailView(LoginRequiredMixin, DetailView):
     model = TestCase
-    template_name = 'bug_tracker/testcase_detail.html'
-    context_object_name = 'testcase'
+    template_name = "bug_tracker/testcase_detail.html"
+    context_object_name = "testcase"
 
 
 class TestCaseCreateView(LoginRequiredMixin, CreateView):
     model = TestCase
     form_class = TestCaseForm
-    template_name = 'bug_tracker/testcase_form.html'
-    success_url = reverse_lazy('testcase_list')
+    template_name = "bug_tracker/testcase_form.html"
+    success_url = reverse_lazy("testcase_list")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
 
 class TestCaseUpdateView(LoginRequiredMixin, UpdateView):
     model = TestCase
     form_class = TestCaseForm
-    template_name = 'bug_tracker/testcase_form.html'
-    success_url = reverse_lazy('testcase_list')
+    template_name = "bug_tracker/testcase_form.html"
+    success_url = reverse_lazy("testcase_list")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs["user"] = self.request.user
         return kwargs
 
 
 class TestCaseDeleteView(LoginRequiredMixin, DeleteView):
     model = TestCase
-    template_name = 'bug_tracker/testcase_confirm_delete.html'
-    success_url = reverse_lazy('testcase_list')
+    template_name = "bug_tracker/testcase_confirm_delete.html"
+    success_url = reverse_lazy("testcase_list")
 
 
 class TestResultUpdateView(UpdateView):
     model = TestResult
-    fields = ['status', 'actual_result']
-    template_name = 'bug_tracker/testresult_update.html'
+    fields = ["status", "actual_result"]
+    template_name = "bug_tracker/testresult_update.html"
 
     def get_success_url(self):
         test_run_id = self.object.test_run.id
-        return reverse('testrun_detail', args=[test_run_id])
+        return reverse("testrun_detail", args=[test_run_id])
 
     def form_valid(self, form):
         instance = form.save(commit=False)
         if instance.status != TestResult.PASSED:
             # Retrieve the chat ID from TelegramUser
             try:
-                telegram_user = TelegramUser.objects.get(user=self.request.user)
+                telegram_user = TelegramUser.objects.get(
+                    user=self.request.user
+                )
                 chat_id = telegram_user.chat_id
 
-                # Get detailed information about the related TestCase and its Project
                 test_case = instance.test_case
                 project = test_case.project
 
                 test_case_details = f"Test case: {test_case.title}\n\n"
                 test_case_details += f"Description: {test_case.description}\n"
                 test_case_details += f"Steps:\n {test_case.steps}\n"
-                test_case_details += f"Expected Result: {test_case.expected_result}\n\n"
+                test_case_details += (f"Expected Result: "
+                                      f"{test_case.expected_result}\n\n")
                 test_case_details += f"Project: {project.title}\n"
                 test_case_details += f"Description: {project.description}\n"
 
-                # Send a message to the bot with the test status, TestCase details, and Project information
-                message = (
-                    f"Test case: {test_case.title}\n\nTest status: {instance.status}\nActual Result: {instance.actual_result}\n \n{test_case_details}")
+                message = (f"Test case: {test_case.title}\n"
+                           f"\nTest status: {instance.status}"
+                           f"\nActual Result: {instance.actual_result}\n "
+                           f"\n{test_case_details}")
                 try:
                     bot = TeleBot(settings.TELEGRAM_BOT_API_KEY)
                     bot.send_message(chat_id, message)
-                except:
+                except Exception:
                     pass
             except TelegramUser.DoesNotExist:
-                # Handle the case when no TelegramUser record exists for the user
+                # Handle the case when no TelegramUser
+                # record exists for the user
                 pass
         instance.timestamp = timezone.now()
         instance.save()
@@ -402,31 +455,39 @@ class TestResultUpdateView(UpdateView):
 
 class TestResultDetailView(DetailView):
     model = TestResult
-    template_name = 'bug_tracker/testresult_detail.html'
+    template_name = "bug_tracker/testresult_detail.html"
 
     def get_object(self, queryset=None):
-        obj = get_object_or_404(TestResult, id=self.kwargs['result_id'])
+        obj = get_object_or_404(TestResult, id=self.kwargs["result_id"])
         return obj
 
 
 class TestResultListView(ListView):
     model = TestResult
-    template_name = 'bug_tracker/testresult_list.html'
-    context_object_name = 'testresults'
+    template_name = "bug_tracker/testresult_list.html"
+    context_object_name = "testresults"
 
     def get_queryset(self):
         queryset = super().get_queryset()
 
         user = self.request.user
 
-        # Filter results by projects created by the user or shared with the user
+        # Filter results by projects created by
+        # the user or shared with the user
         queryset = queryset.filter(
-            Q(test_run__project__created_by=user) | Q(test_run__project__shared_with=user)
+            Q(test_run__project__created_by=user)
+            | Q(test_run__project__shared_with=user)
         )
 
-        status = self.request.GET.get('status')  # Get the status filter value from the request
-        project_id = self.request.GET.get('project')  # Get the project filter value from the request
-        testrun_id = self.request.GET.get('testrun')  # Get the project filter value from the request
+        status = self.request.GET.get(
+            "status"
+        )  # Get the status filter value from the request
+        project_id = self.request.GET.get(
+            "project"
+        )  # Get the project filter value from the request
+        testrun_id = self.request.GET.get(
+            "testrun"
+        )  # Get the project filter value from the request
 
         # Filter results by status
         if status:
@@ -453,10 +514,10 @@ class TestResultListView(ListView):
 
         testruns = TestRun.objects.filter(project__in=projects)
 
-        context['projects'] = projects
-        context['testruns'] = testruns
+        context["projects"] = projects
+        context["testruns"] = testruns
         return context
 
 
 def handler404(request, exception):
-    return render(request, '404.html', status=404)
+    return render(request, "404.html", status=404)
