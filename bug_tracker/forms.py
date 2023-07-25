@@ -29,12 +29,17 @@ class TestCaseForm(forms.ModelForm):
         fields = ['title', 'description', 'steps', 'expected_result', 'priority', 'project']
 
 
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
 class TestRunForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super(TestRunForm, self).__init__(*args, **kwargs)
         self.fields['project'].queryset = user.user.all() | user.users.all()
+
     deadline = forms.DateField(
-        widget=forms.DateInput(attrs={'class': 'datepicker'}),
+        widget=DateInput(),
         help_text='Please select a deadline in the format YYYY-MM-DD.'
     )
 
