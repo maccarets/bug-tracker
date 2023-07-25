@@ -456,3 +456,7 @@ class TestResultListView(ListView):
         context['projects'] = projects
         context['testruns'] = testruns
         return context
+
+
+def handler404(request, exception):
+    return render(request, '404.html', status=404)

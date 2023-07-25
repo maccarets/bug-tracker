@@ -9,6 +9,8 @@ from bug_tracker.views import (RegisterView, TestRunListView, TestCaseDetailView
                                ConnectTelegramView,
                                share_project, TestResultListView, IndexView, SharedProjectListView)
 
+
+
 urlpatterns = [
     path('connect-telegram/', ConnectTelegramView.as_view(), name='connect_telegram'),
 
@@ -46,3 +48,4 @@ urlpatterns = [
     path('testresult/<int:result_id>/', TestResultDetailView.as_view(), name='testresult_detail'),
 
 ]
+
