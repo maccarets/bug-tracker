@@ -1,0 +1,43 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+
+  <h1 class="d-inline-block">Shared Projects</h1>
+
+  <a href="{% url 'project_create' %}" class=" btn btn-primary float-right">Create New Project</a>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <col style="width: 30%">
+          <col style="width: 50%">
+          <col style="width: 10%">
+          <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for project in shared_projects %}
+            <tr>
+              <td><a href="{% url 'project_detail' project.pk %}">{{ project.title }}</a></td>
+              <td>{{ project.description }}</td>
+              <td>
+
+              </td>
+
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3">No shared projects.</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

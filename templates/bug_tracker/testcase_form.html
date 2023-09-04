@@ -1,0 +1,47 @@
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_filters %}
+
+{% block content %}
+
+  <div class="card">
+    <div class="card-body">
+      <h1 class="card-title">{% if testcase.id %}Update{% else %}Create{% endif %} Test Case</h1>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-5">
+            <div class="form-group">
+              {{ form.title|as_crispy_field }}
+            </div>
+            <div class="form-group">
+              {{ form.description|as_crispy_field }}
+            </div>
+          </div>
+          <div class="col-md-7">
+            <div class="form-row">
+              <div class="form-group col-md-6 mb-0">
+                {{ form.priority|as_crispy_field }}
+              </div>
+              <div class="form-group col-md-6 mb-0">
+                {{ form.project|as_crispy_field }}
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6 mb-0">
+                {{ form.steps|as_crispy_field }}
+              </div>
+              <div class="form-group col-md-6 mb-0">
+                {{ form.expected_result|as_crispy_field }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+
+
+{% endblock %}

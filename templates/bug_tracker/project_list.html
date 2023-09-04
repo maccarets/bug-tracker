@@ -1,0 +1,49 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+  <h1 class="d-inline-block">Your Projects</h1>
+
+  <a href="{% url 'project_create' %}" class=" btn btn-primary float-right">Create New Project</a>
+  <div class="card">
+    <div class="card-body">
+
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <col style="width: 30%">
+          <col style="width: 50%">
+          <col style="width: 10%">
+          <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for project in created_projects %}
+            <tr>
+              <td><a href="{% url 'project_detail' project.pk %}">{{ project.title }}</a></td>
+              <td>{{ project.description }}</td>
+              <td>
+                <a href="{% url 'project_update' project.pk %}" class="">
+                  <i class="bi bi-pencil-square"></i>
+                </a>
+                <a class="" href="{% url 'project_delete' project.pk %}">
+                  <i class="bi bi-trash"></i>
+                </a>
+                <a href="{% url 'share_project' project.pk %}" class="">
+                  <i class="bi bi-share"></i>
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3">No created projects.</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
